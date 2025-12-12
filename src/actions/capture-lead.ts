@@ -1,28 +1,66 @@
 "use server";
 
 import { z } from "zod";
+import { insertLead } from "@/lib/supabase";
+import { sendWelcomeEmail, sendAuditReportEmail } from "@/lib/resend";
 
 const leadSchema = z.object({
     email: z.string().email(),
-    url: z.string(), // Relaxed validation as it might come from state
+    url: z.string(),
+    auditSlug: z.string().optional(),
 });
 
-export async function captureLead(email: string, url: string) {
-    const result = leadSchema.safeParse({ email, url });
+interface CaptureLeadResult {
+    success: boolean;
+    error?: string;
+}
+
+export async function captureLead(
+    email: string,
+    url: string,
+    auditSlug?: string
+): Promise<CaptureLeadResult> {
+    const result = leadSchema.safeParse({ email, url, auditSlug });
 
     if (!result.success) {
         return { success: false, error: "Invalid email address" };
     }
 
-    // TODO: Insert into Supabase
-    // await db.insert(leads).values({ email, url });
+    try {
+        // Insert lead into Supabase
+        const lead = await insertLead(email, url, auditSlug);
+        console.log("🎯 LEAD CAPTURED:", { email, url, auditSlug, leadId: lead?.id });
 
-    // TODO: Trigger Resend email
+        // Send welcome email via Resend
+        await sendWelcomeEmail({ to: email });
 
-    console.log("🎯 LEAD CAPTURED:", { email, url });
-
-    // Simulate DB delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return { success: true };
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to capture lead:", error);
+        return { success: false, error: "Failed to save lead" };
+    }
 }
+
+interface SendReportEmailParams {
+    email: string;
+    domain: string;
+    score: number;
+    threatLevel: string;
+    auditSlug: string;
+}
+
+export async function sendReportEmail(params: SendReportEmailParams): Promise<boolean> {
+    try {
+        return await sendAuditReportEmail({
+            to: params.email,
+            domain: params.domain,
+            score: params.score,
+            threatLevel: params.threatLevel,
+            auditSlug: params.auditSlug,
+        });
+    } catch (error) {
+        console.error("Failed to send report email:", error);
+        return false;
+    }
+}
+
