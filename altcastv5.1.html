@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AltCast | The Code Janitor for the AI Age</title>
+    <meta name="description" content="Your AI wrote the code. It didn't check the consequences. Hostile audits for AI-generated apps.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Space Grotesk"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#050505',       // Void Black (Global BG)
+                            surface: '#0a0a0a',  // Slightly lighter for cards
+                            dark: '#000000',     // Pure Black
+                            accent: '#FF003C',   // Danger Red
+                            purple: '#9D00FF',   // Deep Purple
+                            acid: '#CCFF00',     // Neon Green
+                            blue: '#2E5CFF',     // Electric Blue
+                            text: '#e5e5e5',     // Off-white for readability
+                        }
+                    },
+                    boxShadow: {
+                        'neo': '4px 4px 0px 0px #333',
+                        'neo-lg': '8px 8px 0px 0px #333',
+                        'neo-hover': '2px 2px 0px 0px #CCFF00',
+                        'glow': '0 0 20px rgba(255, 0, 60, 0.5)',
+                        'acid-glow': '0 0 15px rgba(204, 255, 0, 0.3)',
+                    },
+                    borderWidth: {
+                        '3': '3px',
+                    },
+                    cursor: {
+                        'crosshair': 'crosshair',
+                    },
+                    animation: {
+                        'marquee': 'marquee 20s linear infinite',
+                        'marquee-slow': 'marquee 40s linear infinite',
+                        'blink': 'blink 1s step-end infinite',
+                    },
+                    keyframes: {
+                        marquee: { '0%': { transform: 'translateX(0%)' }, '100%': { transform: 'translateX(-100%)' } },
+                        blink: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CORE STYLES & RESET */
+        :root { --cursor-size: 20px; }
+        
+        body {
+            background-color: #050505;
+            color: #e5e5e5;
+            cursor: none; /* Custom cursor active */
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* CUSTOM CURSOR */
+        #cursor-dot, #cursor-outline {
+            position: fixed; top: 0; left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%; z-index: 9999; pointer-events: none;
+        }
+        #cursor-dot { width: 8px; height: 8px; background-color: #CCFF00; }
+        #cursor-outline {
+            width: 40px; height: 40px;
+            border: 2px solid #CCFF00;
+            transition: width 0.2s, height 0.2s, background-color 0.2s;
+        }
+        body.hovered #cursor-outline {
+            width: 60px; height: 60px;
+            background-color: rgba(204, 255, 0, 0.1);
+            border-color: #FF003C;
+            mix-blend-mode: exclusion;
+        }
+
+        /* NOISE TEXTURE */
+        .bg-noise {
+            position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        /* GRID PATTERN (Subtle Dark Mode) */
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+        }
+        
+        /* TERMINAL SCROLLBAR */
+        .terminal-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .terminal-scroll::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #333;
+            border: 1px solid #050505;
+        }
+
+        /* GLITCH EFFECT */
+        .glitch-hover:hover {
+            animation: glitch-skew 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both infinite;
+            color: #e5e5e5;
+            text-shadow: 2px 0 #FF003C, -2px 0 #CCFF00;
+        }
+        @keyframes glitch-skew {
+            0% { transform: skew(0deg); }
+            20% { transform: skew(-2deg); }
+            40% { transform: skew(2deg); }
+            60% { transform: skew(-1deg); }
+            80% { transform: skew(1deg); }
+            100% { transform: skew(0deg); }
+        }
+
+        /* SCRAMBLE TEXT EFFECT */
+        .scramble-hover:hover { color: #CCFF00; background-color: #050505; }
+    </style>
+</head>
+<body class="bg-brand-bg bg-grid selection:bg-brand-acid selection:text-black">
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
+    <div class="bg-noise"></div>
+
+    <!-- BOOT SCREEN -->
+    <div id="boot-screen" class="fixed inset-0 z-[100] bg-black text-brand-acid font-mono text-xs p-8 flex flex-col justify-end overflow-hidden cursor-none">
+        <div class="absolute top-4 left-4 border border-brand-acid px-2 animate-blink">SYSTEM_BOOT</div>
+        <div id="boot-log" class="space-y-1 opacity-80 mb-4 max-w-2xl"></div>
+        <div class="w-full h-2 bg-gray-900 border border-gray-700">
+            <div id="boot-bar" class="h-full bg-brand-acid w-0 shadow-acid-glow"></div>
+        </div>
+        <div class="mt-2 flex justify-between">
+            <span>AltCast_OS v5.1 // DARK_MODE_ENFORCED</span>
+            <span id="boot-percent">0%</span>
+        </div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="fixed w-full z-40 top-0 left-0 border-b border-gray-800 bg-brand-bg/90 backdrop-blur-md transform translate-y-[-100%] transition-transform duration-500" id="navbar">
+        <div class="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="#" class="group flex items-center gap-3 magnetic-el interactive-el">
+                <div class="w-10 h-10 bg-brand-acid text-black flex items-center justify-center border-2 border-brand-acid group-hover:bg-white transition-colors shadow-acid-glow">
+                    <i class="ph-bold ph-terminal text-2xl"></i>
+                </div>
+                <div class="flex flex-col leading-none">
+                    <span class="font-black text-2xl tracking-tighter uppercase text-white">AltCast_<span class="animate-blink text-brand-acid">|</span></span>
+                    <span class="font-mono text-[10px] font-bold tracking-widest text-brand-acid">[v5.1]</span>
+                </div>
+            </a>
+
+            <div class="hidden lg:flex items-center gap-8">
+                <div class="font-mono font-bold text-xs uppercase tracking-widest text-brand-acid flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-acid animate-pulse"></span>
+                    STATUS: HUNTING
+                </div>
+                <div class="h-6 w-0.5 bg-gray-800"></div>
+                <button class="interactive-el relative bg-brand-acid text-black px-6 py-2 font-bold uppercase border-2 border-brand-acid hover:shadow-acid-glow transition-all group overflow-hidden">
+                    <span class="relative z-10">[ INITIATE HOSTILE AUDIT ]</span>
+                    <div class="absolute inset-0 bg-white transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200 z-0"></div>
+                </button>
+            </div>
+            
+            <button class="lg:hidden interactive-el p-2 border border-gray-700 text-white">
+                <i class="ph-bold ph-list text-2xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <main class="pt-32 pb-20 overflow-hidden relative min-h-screen flex flex-col justify-center border-b border-gray-800">
+        <div class="max-w-[1600px] mx-auto px-6 grid lg:grid-cols-12 gap-12 w-full z-10 relative">
+            
+            <div class="lg:col-span-6 flex flex-col justify-center z-20 pointer-events-none">
+                <h1 class="pointer-events-auto text-6xl xl:text-8xl font-black leading-[0.85] mb-8 text-white mix-blend-normal uppercase tracking-tight">
+                    Your AI wrote <br> the code. <br> 
+                    <span class="text-brand-accent">It didn't check</span> <br>
+                    the consequences.
+                </h1>
+
+                <h2 class="pointer-events-auto text-xl font-medium text-gray-400 mb-10 max-w-xl leading-relaxed border-l-4 border-brand-acid pl-6 bg-brand-surface/50 backdrop-blur-sm p-4">
+                    You used Cursor to ship in 48 hours. But LLMs only build the "Happy Path." 
+                    <span class="font-bold text-white">AltCast attacks your app</span> to find the race conditions, memory leaks, and 500 errors before your users do.
+                </h2>
+
+                <div class="pointer-events-auto w-full max-w-lg">
+                    <div class="bg-black p-2 border border-gray-700 shadow-neo">
+                        <div class="bg-[#0f0f0f] border border-gray-800 flex items-center p-3 gap-2 mb-2">
+                            <span class="text-brand-acid font-mono font-bold">root@altcast:~$</span>
+                            <span class="text-gray-400 font-mono text-sm">target --url</span>
+                            <input type="text" placeholder="getaltcast.com" class="bg-transparent border-none text-white font-mono text-sm focus:outline-none w-full caret-brand-acid placeholder-gray-700">
+                        </div>
+                        <button class="w-full bg-brand-acid text-black font-black uppercase py-4 hover:bg-white transition-colors interactive-el tracking-widest text-lg border-2 border-brand-acid">
+                            [ BREAK MY APP (FREE AUDIT) ]
+                        </button>
+                    </div>
+                    <p class="font-mono text-[10px] text-gray-600 mt-2 text-center uppercase tracking-wider">No credit card. We only charge if we find blood.</p>
+                </div>
+            </div>
+
+            <!-- Terminal Visual -->
+            <div class="lg:col-span-6 relative h-[600px] bg-black border border-gray-800 shadow-neo-lg overflow-hidden interactive-area group flex flex-col">
+                <div class="h-10 bg-[#0f0f0f] border-b border-gray-800 flex items-center justify-between px-4 z-30 pointer-events-none">
+                    <div class="flex gap-2">
+                        <div class="w-3 h-3 rounded-full bg-gray-700"></div>
+                        <div class="w-3 h-3 rounded-full bg-gray-700"></div>
+                        <div class="w-3 h-3 rounded-full bg-gray-700"></div>
+                    </div>
+                    <div class="font-mono text-xs font-bold uppercase tracking-widest text-gray-600">bash — hostile_audit_v5.sh</div>
+                </div>
+
+                <div class="p-6 font-mono text-sm text-brand-acid flex-grow relative overflow-y-auto terminal-scroll" id="hero-terminal">
+                    <!-- Typed content goes here via JS -->
+                </div>
+                
+                <div class="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black to-transparent pointer-events-none"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- KILL FEED TICKER -->
+    <div class="bg-brand-accent border-b border-black py-3 overflow-hidden relative z-20 -rotate-1 scale-105 origin-right shadow-lg">
+        <div class="animate-marquee whitespace-nowrap flex gap-12 font-black text-2xl uppercase items-center text-white">
+            <span>[ 💀 KILL CONFIRMED: Fintech App (Race Condition) ]</span>
+            <span>[ 💀 KILL CONFIRMED: Health SaaS (PII Leak) ]</span>
+            <span>[ 💀 KILL CONFIRMED: Crypto Wallet (Auth Bypass) ]</span>
+            <span>[ 💀 KILL CONFIRMED: E-Com (SQL Injection) ]</span>
+            <span>[ 💀 KILL CONFIRMED: Fintech App (Race Condition) ]</span>
+            <span>[ 💀 KILL CONFIRMED: Health SaaS (PII Leak) ]</span>
+        </div>
+    </div>
+
+    <!-- THE PROBLEM SECTION (Dark Mode) -->
+    <section class="py-24 px-6 max-w-8xl mx-auto border-b border-gray-800 bg-brand-bg">
+        <div class="max-w-4xl mx-auto text-center mb-16">
+            <h2 class="text-5xl font-black uppercase mb-6 text-white glitch-hover cursor-help inline-block">The "Glass Cannon" Reality.</h2>
+            <p class="text-xl text-gray-400 font-medium leading-relaxed">
+                You felt like a god building your MVP in a weekend. But deep down, you know the truth: 
+                <span class="bg-brand-acid px-1 font-bold text-black">You didn't write that code.</span>
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 text-center">
+            <div class="p-6 border border-gray-800 bg-brand-surface shadow-neo hover:translate-y-[-4px] transition-transform interactive-el group">
+                <i class="ph-duotone ph-wifi-slash text-5xl mb-4 text-brand-purple group-hover:text-white transition-colors"></i>
+                <h3 class="font-bold uppercase text-lg mb-2 text-white">The Race Condition</h3>
+                <p class="font-mono text-sm text-gray-500">What happens when a user double-clicks "Pay" on bad WiFi?</p>
+            </div>
+            <div class="p-6 border border-gray-800 bg-brand-surface shadow-neo hover:translate-y-[-4px] transition-transform interactive-el group">
+                <i class="ph-duotone ph-brackets-angle text-5xl mb-4 text-brand-accent group-hover:text-white transition-colors"></i>
+                <h3 class="font-bold uppercase text-lg mb-2 text-white">The Injection</h3>
+                <p class="font-mono text-sm text-gray-500">Did the AI sanitize the inputs on that new form?</p>
+            </div>
+            <div class="p-6 border border-gray-800 bg-brand-surface shadow-neo hover:translate-y-[-4px] transition-transform interactive-el group">
+                <i class="ph-duotone ph-warning-octagon text-5xl mb-4 text-white"></i>
+                <h3 class="font-bold uppercase text-lg mb-2 text-white">The Crash</h3>
+                <p class="font-mono text-sm text-gray-500">Your user sees a generic error. You see a churned customer.</p>
+            </div>
+        </div>
+        
+        <div class="mt-16 text-center">
+            <p class="font-black text-2xl uppercase border-b-4 border-brand-accent text-white inline-block pb-1">If you can't read the code, you can't fix the code. We do both.</p>
+        </div>
+    </section>
+
+    <!-- THE PROTOCOL -->
+    <section id="features" class="py-32 px-6 max-w-8xl mx-auto">
+        <div class="flex items-center gap-4 mb-16">
+            <div class="bg-brand-acid text-black px-4 py-2 font-mono font-bold uppercase tracking-widest border border-brand-acid shadow-acid-glow">The Protocol</div>
+            <div class="h-px bg-gray-800 flex-grow"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-black text-white border border-gray-800 shadow-neo p-8 flex flex-col relative overflow-hidden interactive-el hover:shadow-acid-glow transition-all group">
+                <div class="absolute top-0 right-0 bg-brand-acid text-black px-3 py-1 font-mono font-bold text-xs">01</div>
+                <h3 class="text-3xl font-black uppercase mb-4 text-brand-acid">Kinetic <br>Stress Testing</h3>
+                <p class="font-mono text-sm text-gray-400 leading-relaxed mb-6">
+                    We don't just "click around." We deploy hostile Playwright bots that hammer your API, flood your forms, and mimic chaotic users. We simulate the conditions your AI forgot to test.
+                </p>
+                <div class="mt-auto h-1 bg-brand-acid w-12 group-hover:w-full transition-all duration-500"></div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="bg-brand-surface border border-gray-800 shadow-neo p-8 flex flex-col relative overflow-hidden interactive-el hover:-translate-y-2 transition-transform">
+                <div class="absolute top-0 right-0 bg-gray-800 text-white px-3 py-1 font-mono font-bold text-xs">02</div>
+                <h3 class="text-3xl font-black uppercase mb-4 text-white">The Forensic <br>Evidence</h3>
+                <p class="font-mono text-sm text-gray-500 leading-relaxed mb-6">
+                    Stop guessing why it crashed. We send you a Trace File (Flight Recorder). Watch the exact millisecond your database locked up. See the network packets that killed your server.
+                </p>
+                <div class="mt-auto border border-gray-800 text-xs font-mono p-2 bg-black text-gray-400">
+                    <div class="flex justify-between"><span>TRACE_ID:</span> <span>992-X</span></div>
+                    <div class="flex justify-between text-brand-accent"><span>ERROR:</span> <span>DEADLOCK</span></div>
+                </div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="bg-brand-purple text-white border border-brand-purple shadow-neo p-8 relative overflow-hidden interactive-el hover:shadow-glow transition-all">
+                <div class="absolute top-0 right-0 bg-black text-brand-purple px-3 py-1 font-mono font-bold text-xs">03</div>
+                <h3 class="text-3xl font-black uppercase mb-4">The Remediation <br>Prompt</h3>
+                <p class="font-mono text-sm text-white/80 leading-relaxed mb-6">
+                    We know you don't want to debug. We analyze the crash and send you the <strong class="text-white border-b border-white">Exact Prompt</strong> to paste back into Cursor.
+                </p>
+                <div class="bg-black/40 p-3 rounded font-mono text-[10px] border border-white/20">
+                    <span class="text-brand-acid">Input:</span> The Crash Log.<br>
+                    <span class="text-brand-acid">Output:</span> "Act as Senior React Dev..."<br>
+                    <span class="text-brand-acid">Result:</span> You Copy. You Paste.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE OFFER: THE RANSOM -->
+    <section id="pricing" class="py-32 bg-brand-bg border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="text-6xl font-black uppercase text-center mb-16 text-white">The Ransom <span class="block text-2xl text-brand-acid font-mono mt-2 tracking-widest bg-brand-surface border border-gray-700 w-fit mx-auto px-2 transform -skew-x-12">"ZERO-DAY" GUARANTEE</span></h2>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center max-w-4xl mx-auto">
+                <!-- Card 1 (Dark Grey) -->
+                <div class="bg-brand-surface border border-gray-700 p-8 shadow-neo hover:translate-y-[-5px] transition-transform interactive-el flex flex-col h-full group">
+                    <h3 class="text-3xl font-black uppercase text-white">The Bounty</h3>
+                    <p class="font-mono text-xs text-gray-500 mt-2 mb-6 uppercase tracking-widest">One-time Audit</p>
+                    
+                    <div class="text-6xl font-black mb-8 text-white">$299</div>
+                    
+                    <ul class="space-y-4 font-mono text-sm mb-8 flex-grow text-gray-400">
+                        <li class="flex gap-2 items-start">
+                            <i class="ph-bold ph-warning text-black bg-brand-acid rounded-full p-0.5 text-[10px] mt-1"></i> 
+                            <span>The Survival Probability: <span class="text-brand-accent font-bold">&lt;5%</span>. Badge is scarce.</span>
+                        </li>
+                        <li class="flex gap-2 items-start"><i class="ph-bold ph-check text-brand-acid mt-1"></i> <span>If we break it: Video Evidence + Fix Prompt.</span></li>
+                    </ul>
+                    <button class="w-full bg-transparent text-white border-2 border-white py-4 font-bold uppercase hover:bg-white hover:text-black transition-colors interactive-el">
+                        Deploy Hunter-Killer
+                    </button>
+                </div>
+
+                <!-- Card 2 (Black) -->
+                <div class="bg-black text-white border border-brand-acid p-10 shadow-acid-glow transform md:scale-105 relative z-10 interactive-el h-full flex flex-col">
+                    <div class="absolute top-0 right-0 bg-brand-acid text-black px-4 py-1 font-bold text-xs uppercase tracking-widest">Immunity</div>
+                    <h3 class="text-3xl font-black uppercase text-brand-acid">The Night Watch</h3>
+                    <p class="font-mono text-xs text-gray-500 mt-2 mb-6 uppercase tracking-widest">24/7 Surveillance</p>
+                    
+                    <div class="text-6xl font-black mb-8">$2,500<span class="text-2xl text-gray-500">/mo</span></div>
+                    
+                    <ul class="space-y-4 font-mono text-sm mb-8 text-gray-300 flex-grow">
+                        <li class="flex gap-2"><i class="ph-bold ph-shield-check text-brand-acid"></i> Continuous Stress Testing</li>
+                        <li class="flex gap-2"><i class="ph-bold ph-shield-check text-brand-acid"></i> CI/CD Pipeline Injection</li>
+                        <li class="flex gap-2"><i class="ph-bold ph-shield-check text-brand-acid"></i> Priority Remediation Team</li>
+                    </ul>
+                    <button class="w-full bg-brand-acid text-black border-2 border-brand-acid py-4 font-black uppercase hover:bg-black hover:text-brand-acid transition-colors interactive-el">
+                        Secure The Perimeter
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-black text-white pt-24 pb-12 border-t border-gray-800 relative overflow-hidden">
+        <div class="max-w-8xl mx-auto px-6 grid md:grid-cols-2 gap-12 relative z-10">
+            <div>
+                <i class="ph-bold ph-terminal-window text-6xl text-brand-acid mb-6 block"></i>
+                <h2 class="text-4xl font-black uppercase mb-6 leading-none">AltCast Systems.</h2>
+                <p class="font-mono text-gray-400 mb-6">The Code Janitor for the AI Age.<br>
+                   Operating from Iligan City 
+                   <!-- LOGISTICS STAMP -->
+                   <span class="font-mono text-[10px] tracking-[0.3em] bg-white text-black px-2 py-0.5 inline-block ml-2 opacity-80 rotate-3 select-none" title="Logistics Node: ACTIVE">||| || ||| ||</span>
+                   / Cloud.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="px-4 py-2 border border-gray-700 font-mono text-xs hover:bg-white hover:text-black transition-colors interactive-el">Twitter / X</a>
+                    <a href="#" class="px-4 py-2 border border-gray-700 font-mono text-xs hover:bg-white hover:text-black transition-colors interactive-el">Github</a>
+                </div>
+                <div class="mt-4 font-mono text-xs text-brand-accent">breach@getaltcast.com</div>
+            </div>
+        </div>
+        <div class="max-w-8xl mx-auto px-6 mt-20 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs font-mono text-gray-600">
+            <p>&copy; 2025 ALTCAST SYSTEMS. NO SURVIVORS.</p>
+            <p class="mt-4 md:mt-0">DESIGNED IN THE VOID.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. AUDIO ENGINE (Synthesized) ---
+        let audioCtx;
+        function playSound(type) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            if (type === 'hover') {
+                osc.type = 'sawtooth'; // Aggressive sound for AltCast
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } else if (type === 'click') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+        }
+        
+        document.querySelectorAll('.interactive-el').forEach(el => {
+            el.addEventListener('mouseenter', () => playSound('hover'));
+            el.addEventListener('mousedown', () => playSound('click'));
+        });
+
+        // --- 2. BOOT SEQUENCE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const bar = document.getElementById('boot-bar');
+            const screen = document.getElementById('boot-screen');
+            const log = document.getElementById('boot-log');
+            const pct = document.getElementById('boot-percent');
+            const navbar = document.getElementById('navbar');
+            
+            const logs = [
+                "Initializing Hunter-Killer Protocol...", 
+                "Loading Payload Modules...", 
+                "Scanning for Open Ports...", 
+                "Bypassing Ethical Constraints...", 
+                "Target Acquired...", 
+                "System Ready."
+            ];
+            
+            let w = 0;
+            const interval = setInterval(() => {
+                w += Math.random() * 4;
+                if(w > 100) w = 100;
+                bar.style.width = w + '%';
+                pct.innerText = Math.floor(w) + '%';
+                
+                if(Math.random() > 0.8 && logs.length > 0) {
+                    const line = document.createElement('div');
+                    line.innerHTML = `<span class="text-brand-acid">></span> ${logs.shift()}`;
+                    log.appendChild(line);
+                }
+
+                if(w === 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        gsap.to(screen, { 
+                            yPercent: -100, 
+                            duration: 0.8, 
+                            ease: "power4.inOut",
+                            onComplete: () => {
+                                navbar.style.transform = "translateY(0)";
+                                runHeroTerminal();
+                            }
+                        });
+                    }, 500);
+                }
+            }, 20);
+        });
+
+        // --- 3. CURSOR LOGIC ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorOutline = document.getElementById('cursor-outline');
+        
+        window.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            cursorDot.style.left = x + 'px';
+            cursorDot.style.top = y + 'px';
+            
+            cursorOutline.animate({
+                left: `${x}px`,
+                top: `${y}px`
+            }, { duration: 500, fill: "forwards" });
+        });
+
+        document.querySelectorAll('.interactive-el').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+                document.body.classList.add('hovered');
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0,0)';
+                document.body.classList.remove('hovered');
+            });
+        });
+
+        // --- 4. HERO TERMINAL SCRIPT ---
+        function runHeroTerminal() {
+            const terminal = document.getElementById('hero-terminal');
+            const commands = [
+                { text: "> TARGET ACQUIRED: v5.1-signup-flow", delay: 500, color: "text-brand-acid" },
+                { text: "> INJECTING: \"😀😀😀\" into field: email", delay: 1500, color: "text-white" },
+                { text: "> INJECTING: Double-Click Event (300ms)", delay: 2500, color: "text-white" },
+                { text: "> RESULT: 500 INTERNAL SERVER ERROR", delay: 3500, color: "text-brand-accent font-bold" },
+                { text: "> VULNERABILITY CONFIRMED.", delay: 4500, color: "text-brand-accent animate-pulse" }
+            ];
+
+            let cumulativeDelay = 0;
+
+            commands.forEach(cmd => {
+                cumulativeDelay += cmd.delay;
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = `mb-2 ${cmd.color}`;
+                    line.textContent = cmd.text;
+                    terminal.appendChild(line);
+                    terminal.scrollTop = terminal.scrollHeight;
+                    playSound('click'); // Type sound
+                }, cumulativeDelay);
+            });
+        }
+    </script>
+</body>
+</html>
