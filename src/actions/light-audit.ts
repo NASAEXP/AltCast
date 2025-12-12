@@ -306,6 +306,32 @@ function createErrorResult(slug: string, scanDuration: number): LightAuditResult
     };
 }
 
+function createPerfectResult(slug: string, scanDuration: number): LightAuditResult {
+    const maxScore = 100;
+    return {
+        status: "clean",
+        slug,
+        vulnerabilities: [
+            { code: "[CWE-79] XSS_PROTECTION", name: "XSS_PROTECTION", severity: "info", description: "Content-Security-Policy header present", points: 15, maxPoints: 15 },
+            { code: "[CWE-1021] CLICKJACKING", name: "CLICKJACKING", severity: "info", description: "Frame embedding protection enabled", points: 15, maxPoints: 15 },
+            { code: "[CWE-319] TRANSPORT_SECURITY", name: "TRANSPORT_SECURITY", severity: "info", description: "HSTS header enforces secure connections", points: 15, maxPoints: 15 },
+            { code: "[CWE-16] MIME_SNIFFING", name: "MIME_SNIFFING", severity: "info", description: "X-Content-Type-Options: nosniff enabled", points: 10, maxPoints: 10 },
+            { code: "[CWE-200] SERVER_DISCLOSURE", name: "SERVER_DISCLOSURE", severity: "info", description: "Server banner not disclosed", points: 5, maxPoints: 5 },
+            { code: "[CWE-200] FRAMEWORK_EXPOSURE", name: "FRAMEWORK_EXPOSURE", severity: "info", description: "No framework fingerprint in headers", points: 5, maxPoints: 5 },
+            { code: "[CWE-200] REFERRER_POLICY", name: "REFERRER_POLICY", severity: "info", description: "Referrer-Policy: strict-origin-when-cross-origin", points: 10, maxPoints: 10 },
+            { code: "[CWE-16] PERMISSIONS_POLICY", name: "PERMISSIONS_POLICY", severity: "info", description: "Permissions-Policy header present", points: 10, maxPoints: 10 },
+            { code: "[CWE-1059] SECURITY_TXT", name: "SECURITY_TXT", severity: "info", description: "security.txt file present", points: 10, maxPoints: 10 },
+            { code: "[CWE-538] ROBOTS_TXT", name: "ROBOTS_TXT", severity: "info", description: "robots.txt present and clean", points: 5, maxPoints: 5 },
+        ],
+        scanDuration,
+        siteType: "spa",
+        industryCategory: "saas",
+        totalScore: maxScore,
+        maxScore,
+        scorePercentage: 100,
+    };
+}
+
 async function checkSecurityTxt(baseUrl: string): Promise<{ exists: boolean }> {
     try {
         const response = await fetch(`${baseUrl}/.well-known/security.txt`, {

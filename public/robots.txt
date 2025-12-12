@@ -1,0 +1,7 @@
+# AltCast Robots.txt
+# https://getaltcast.com
+
+User-agent: *
+Allow: /
+
+Sitemap: https://getaltcast.com/sitemap.xml
