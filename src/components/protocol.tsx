@@ -38,13 +38,16 @@ export function Protocol() {
                 <div className="bg-purple text-white border border-purple shadow-neo p-8 relative overflow-hidden interactive-el hover:shadow-glow-danger transition-all">
                     <div className="absolute top-0 right-0 bg-black text-purple px-3 py-1 font-mono font-bold text-xs">03</div>
                     <h3 className="text-3xl font-black uppercase mb-4">The Remediation <br />Prompt</h3>
-                    <p className="font-mono text-sm text-white/80 leading-relaxed mb-6">
-                        We know you don't want to debug. We analyze the crash and send you the <strong className="text-white border-b border-white">Exact Prompt</strong> to paste back into Cursor.
+                    <p className="font-mono text-sm text-white/80 leading-relaxed mb-2">
+                        We don&apos;t just break it. <strong className="text-white border-b border-white">We generate the diff to fix it.</strong>
+                    </p>
+                    <p className="font-mono text-sm text-white/60 leading-relaxed mb-6">
+                        Paste the exact prompt back into Cursor and ship the fix in minutes, not hours.
                     </p>
                     <div className="bg-black/40 p-3 rounded font-mono text-[10px] border border-white/20">
                         <span className="text-acid">Input:</span> The Crash Log.<br />
-                        <span className="text-acid">Output:</span> "Act as Senior React Dev..."<br />
-                        <span className="text-acid">Result:</span> You Copy. You Paste.
+                        <span className="text-acid">Output:</span> &quot;Act as Senior React Dev...&quot;<br />
+                        <span className="text-acid">Result:</span> Copy. Paste. Fixed.
                     </div>
                 </div>
             </div>

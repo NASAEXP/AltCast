@@ -1,44 +1,28 @@
 "use server";
 
 import { z } from "zod";
-import { insertLead } from "@/lib/supabase";
-import { sendLeadCaptureEmail } from "@/lib/resend";
 
 const leadSchema = z.object({
     email: z.string().email(),
-    url: z.string().url().optional().or(z.literal("")),
-    auditSlug: z.string().optional(),
+    url: z.string(), // Relaxed validation as it might come from state
 });
 
-export async function captureLead(email: string, url: string, auditSlug?: string) {
-    const result = leadSchema.safeParse({ email, url, auditSlug });
+export async function captureLead(email: string, url: string) {
+    const result = leadSchema.safeParse({ email, url });
 
     if (!result.success) {
         return { success: false, error: "Invalid email address" };
     }
 
-    try {
-        // Insert lead into Supabase
-        await insertLead({
-            email,
-            url: url || "",
-            audit_slug: auditSlug,
-        });
+    // TODO: Insert into Supabase
+    // await db.insert(leads).values({ email, url });
 
-        // Send confirmation email via Resend
-        if (process.env.RESEND_API_KEY) {
-            await sendLeadCaptureEmail({ email, url: url || "Not specified" });
-        }
+    // TODO: Trigger Resend email
 
-        console.log("🎯 LEAD CAPTURED:", { email, url, auditSlug });
+    console.log("🎯 LEAD CAPTURED:", { email, url });
 
-        return { success: true };
-    } catch (error) {
-        console.error("Failed to capture lead:", error);
+    // Simulate DB delay
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Still return success if it's just email that failed
-        // The lead was captured in the database
-        return { success: true, warning: "Email notification may have failed" };
-    }
+    return { success: true };
 }
-

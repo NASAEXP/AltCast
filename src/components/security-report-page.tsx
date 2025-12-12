@@ -126,74 +126,74 @@ const MOCK_REPORT: AuditReport = {
 function getGradeConfig(grade: Grade) {
     const configs = {
         S: {
-            label: "INFRASTRUCTURE",
+            label: "CLASS 05 | INFRASTRUCTURE",
             color: "text-amber-400",
+            barColor: "bg-amber-400",
             bgColor: "bg-amber-400/10",
             borderColor: "border-amber-400",
-            barColor: "bg-amber-400",
             glowClass: "shadow-[0_0_60px_rgba(251,191,36,0.4)]",
             holoEffect: true,
         },
         "A+": {
-            label: "INFRASTRUCTURE",
-            color: "text-amber-400",
-            bgColor: "bg-amber-400/10",
-            borderColor: "border-amber-400",
-            barColor: "bg-amber-400",
-            glowClass: "shadow-[0_0_40px_rgba(251,191,36,0.3)]",
+            label: "CLASS 05 | INFRASTRUCTURE",
+            color: "text-red-400",
+            barColor: "bg-red-400",
+            bgColor: "bg-red-400/10",
+            borderColor: "border-red-400",
+            glowClass: "shadow-[0_0_40px_rgba(248,113,113,0.3)]",
             holoEffect: false,
         },
         A: {
-            label: "ENTERPRISE",
-            color: "text-blue-400",
-            bgColor: "bg-blue-400/10",
-            borderColor: "border-blue-400",
-            barColor: "bg-blue-400",
-            glowClass: "shadow-[0_0_30px_rgba(96,165,250,0.3)]",
+            label: "CLASS 04 | ENTERPRISE",
+            color: "text-emerald-400",
+            barColor: "bg-emerald-400",
+            bgColor: "bg-emerald-400/10",
+            borderColor: "border-emerald-400",
+            glowClass: "shadow-[0_0_30px_rgba(52,211,153,0.3)]",
             holoEffect: false,
         },
         "B+": {
-            label: "ENTERPRISE",
+            label: "CLASS 04 | ENTERPRISE",
             color: "text-blue-400",
+            barColor: "bg-blue-400",
             bgColor: "bg-blue-400/10",
             borderColor: "border-blue-400",
-            barColor: "bg-blue-400",
             glowClass: "",
             holoEffect: false,
         },
         B: {
-            label: "STANDARD",
-            color: "text-emerald-400",
-            bgColor: "bg-emerald-400/10",
-            borderColor: "border-emerald-400",
-            barColor: "bg-emerald-400",
+            label: "CLASS 03 | STANDARD",
+            color: "text-blue-400",
+            barColor: "bg-blue-400",
+            bgColor: "bg-blue-400/10",
+            borderColor: "border-blue-400",
             glowClass: "",
             holoEffect: false,
         },
         "C+": {
-            label: "PROVISIONAL",
+            label: "CLASS 02 | PROVISIONAL",
             color: "text-yellow-400",
+            barColor: "bg-yellow-400",
             bgColor: "bg-yellow-400/10",
             borderColor: "border-yellow-400",
-            barColor: "bg-yellow-400",
             glowClass: "",
             holoEffect: false,
         },
         C: {
-            label: "PROVISIONAL",
+            label: "CLASS 02 | PROVISIONAL",
             color: "text-orange-400",
+            barColor: "bg-orange-400",
             bgColor: "bg-orange-400/10",
             borderColor: "border-orange-400",
-            barColor: "bg-orange-400",
             glowClass: "",
             holoEffect: false,
         },
         F: {
-            label: "CRITICAL",
+            label: "CLASS 01 | CRITICAL",
             color: "text-red-500",
+            barColor: "bg-red-500",
             bgColor: "bg-red-500/10",
             borderColor: "border-red-500",
-            barColor: "bg-red-500",
             glowClass: "shadow-[0_0_40px_rgba(239,68,68,0.5)]",
             holoEffect: false,
             glitchEffect: true,
@@ -237,13 +237,18 @@ function HeaderBar() {
         <div className="border-b border-gray-800 bg-black/80 backdrop-blur-sm sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
                 <a href="/" className="font-mono text-xs sm:text-sm tracking-[0.2em] text-gray-400 uppercase hover:text-white transition-colors">
-                    <span className="text-white font-bold">ALTCAST</span> SECURITY{" "}
+                    <span className="text-white font-bold">ALTCAST</span> SECURITY INDEX{" "}
                     <span className="hidden sm:inline text-gray-600">//</span>{" "}
                     <span className="hidden sm:inline text-red-400">PUBLIC RECORD</span>
                 </a>
-                <div className="flex items-center gap-2 text-gray-500 font-mono text-xs">
-                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    <span className="hidden sm:inline">LIVE</span>
+                <div className="flex items-center gap-4">
+                    <a href="/leaderboard" className="font-mono text-xs text-gray-500 hover:text-white transition-colors">
+                        LEADERBOARD
+                    </a>
+                    <div className="flex items-center gap-2 text-gray-500 font-mono text-xs">
+                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        <span className="hidden sm:inline">LIVE</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -484,12 +489,12 @@ function BountyUpsell() {
                 </div>
 
                 <h3 className="text-3xl sm:text-4xl font-black uppercase text-white mb-4">
-                    We Found These In 30 Seconds.
+                    This Is What We Found In 30 Seconds.
                     <span className="block text-red-400">Imagine What We&apos;d Find In 30 Minutes.</span>
                 </h3>
 
                 <p className="text-gray-400 font-mono text-sm mb-8 max-w-xl mx-auto">
-                    This free scan detected surface-level vulnerabilities. The real threats hide deeper—race conditions, idempotency failures, payment exploits. Things that cost you money while you sleep.
+                    This free scan detected surface-level vulnerabilities. The real threats hide deeper: race conditions, idempotency failures, payment exploits. Things that cost you money while you sleep.
                 </p>
 
                 {/* Pricing Card */}
@@ -526,7 +531,7 @@ function BountyUpsell() {
                 </div>
 
                 <p className="text-gray-600 text-xs font-mono mt-6">
-                    "We try to break your app before someone else does." — AltCast
+                    "We try to break your app before someone else does."
                 </p>
             </div>
         </div>
@@ -603,7 +608,7 @@ export function SecurityReportPage({ report = MOCK_REPORT }: { report?: AuditRep
             <footer className="border-t border-gray-800 bg-gray-950">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div className="font-mono text-xs text-gray-600">
-                        © 2025 ALTCAST. ALL RIGHTS RESERVED.
+                        © 2025 ALTCAST BUREAU OF STANDARDS. ALL RIGHTS RESERVED.
                     </div>
                     <div className="font-mono text-xs text-gray-600">
                         REPORT ID: {Math.random().toString(36).substring(2, 10).toUpperCase()}

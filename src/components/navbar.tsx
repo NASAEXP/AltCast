@@ -8,7 +8,7 @@ export function Navbar() {
         <motion.nav
             initial={{ y: -100 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="fixed w-full z-40 top-0 left-0 border-b border-gray-800 bg-void/90 backdrop-blur-md"
         >
             <div className="max-w-[1600px] mx-auto px-6 h-20 flex items-center justify-between">

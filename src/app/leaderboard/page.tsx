@@ -2,14 +2,10 @@
 
 import { useState } from "react";
 import { IndustrialBadge } from "@/components/industrial-badge";
-import { Zap, TrendingUp, AlertTriangle, Activity, Search, ArrowRight, ExternalLink, Shield } from "lucide-react";
+import { Zap, TrendingUp, AlertTriangle, Activity, Search, ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-// ==================== DATA TYPES ====================
-// TODO: Replace with Supabase types when integrating
-// import { Database } from "@/types/supabase";
-// type LeaderboardEntry = Database["public"]["Tables"]["audits"]["Row"];
-
+// ==================== MOCK DATA ====================
 interface LeaderboardEntry {
     id: string;
     rank: number;
@@ -23,56 +19,41 @@ interface LeaderboardEntry {
     lastAudit: string;
 }
 
-interface BaselineReference {
-    id: string;
-    name: string;
-    url: string;
-    classRank: 5;
-    score: number;
-    description: string;
-}
+const MOCK_DATA: LeaderboardEntry[] = [
+    // CLASS 05 - Infrastructure (Gold)
+    { id: "1", rank: 1, name: "Stripe", url: "stripe.com", slug: "stripe-com-miw3kzmk", classRank: 5, latency: 42, score: 98, change: "none", lastAudit: "2h ago" },
+    { id: "2", rank: 2, name: "Linear", url: "linear.app", slug: "linear-app", classRank: 5, latency: 67, score: 97, change: "up", lastAudit: "4h ago" },
+    { id: "3", rank: 3, name: "Vercel", url: "vercel.com", slug: "vercel-com", classRank: 5, latency: 89, score: 96, change: "none", lastAudit: "1h ago" },
 
-// ==================== BASELINE REFERENCES ====================
-// Industry giants used as security benchmarks - NOT competing in rankings
-const BASELINE_REFERENCES: BaselineReference[] = [
-    { id: "ref-1", name: "Stripe", url: "dashboard.stripe.com", classRank: 5, score: 98, description: "Payment infrastructure gold standard" },
-    { id: "ref-2", name: "Linear", url: "linear.app", classRank: 5, score: 97, description: "Engineering-grade issue tracking" },
-    { id: "ref-3", name: "Vercel", url: "vercel.com", classRank: 5, score: 96, description: "Edge deployment reference" },
-    { id: "ref-4", name: "Cloudflare", url: "dash.cloudflare.com", classRank: 5, score: 99, description: "Security infrastructure baseline" },
-];
-
-// ==================== RANKED ENTRIES ====================
-// TODO: Fetch from Supabase: supabase.from('audits').select('*').order('score', { ascending: false })
-const RANKED_ENTRIES: LeaderboardEntry[] = [
     // CLASS 04 - Enterprise
-    { id: "4", rank: 1, name: "Notion", url: "notion.so", slug: "notion-so", classRank: 4, latency: 156, score: 91, change: "down", lastAudit: "6h ago" },
-    { id: "5", rank: 2, name: "Figma", url: "figma.com", slug: "figma-com", classRank: 4, latency: 134, score: 89, change: "up", lastAudit: "3h ago" },
+    { id: "4", rank: 4, name: "Notion", url: "notion.so", slug: "notion-so", classRank: 4, latency: 156, score: 91, change: "down", lastAudit: "6h ago" },
+    { id: "5", rank: 5, name: "Figma", url: "figma.com", slug: "figma-com", classRank: 4, latency: 134, score: 89, change: "up", lastAudit: "3h ago" },
 
     // CLASS 03 - Standard
-    { id: "6", rank: 3, name: "Raycast", url: "raycast.com", slug: "raycast-com", classRank: 3, latency: 234, score: 82, change: "none", lastAudit: "12h ago" },
-    { id: "7", rank: 4, name: "Cal.com", url: "cal.com", slug: "cal-com", classRank: 3, latency: 189, score: 79, change: "up", lastAudit: "8h ago" },
-    { id: "8", rank: 5, name: "Dub.co", url: "dub.co", slug: "dub-co", classRank: 3, latency: 312, score: 75, change: "down", lastAudit: "5h ago" },
+    { id: "6", rank: 6, name: "Raycast", url: "raycast.com", slug: "raycast-com", classRank: 3, latency: 234, score: 82, change: "none", lastAudit: "12h ago" },
+    { id: "7", rank: 7, name: "Cal.com", url: "cal.com", slug: "cal-com", classRank: 3, latency: 189, score: 79, change: "up", lastAudit: "8h ago" },
+    { id: "8", rank: 8, name: "Dub.co", url: "dub.co", slug: "dub-co", classRank: 3, latency: 312, score: 75, change: "down", lastAudit: "5h ago" },
 
     // CLASS 02 - Provisional
-    { id: "9", rank: 6, name: "MapleAI", url: "maple-ai.io", slug: "maple-ai", classRank: 2, latency: 567, score: 58, change: "down", lastAudit: "24h ago" },
-    { id: "10", rank: 7, name: "ShipFast", url: "shipfast.dev", slug: "shipfast-dev", classRank: 2, latency: 445, score: 52, change: "none", lastAudit: "18h ago" },
+    { id: "9", rank: 9, name: "MapleAI", url: "maple-ai.io", slug: "maple-ai", classRank: 2, latency: 567, score: 58, change: "down", lastAudit: "24h ago" },
+    { id: "10", rank: 10, name: "ShipFast", url: "shipfast.dev", slug: "shipfast-dev", classRank: 2, latency: 445, score: 52, change: "none", lastAudit: "18h ago" },
 
     // CLASS 01 - Critical (Vibecoders)
-    { id: "11", rank: 8, name: "FastGen AI", url: "fastgen-ai.com", slug: "fastgen-ai", classRank: 1, latency: 1234, score: 23, change: "down", lastAudit: "2d ago" },
-    { id: "12", rank: 9, name: "TalkPDF", url: "talkpdf.io", slug: "talkpdf-io", classRank: 1, latency: 2341, score: 18, change: "down", lastAudit: "3d ago" },
-    { id: "13", rank: 10, name: "VibeCode", url: "vibecode.xyz", slug: "vibecode-xyz", classRank: 1, latency: 3456, score: 12, change: "down", lastAudit: "5d ago" },
+    { id: "11", rank: 11, name: "FastGen AI", url: "fastgen-ai.com", slug: "fastgen-ai", classRank: 1, latency: 1234, score: 23, change: "down", lastAudit: "2d ago" },
+    { id: "12", rank: 12, name: "TalkPDF", url: "talkpdf.io", slug: "talkpdf-io", classRank: 1, latency: 2341, score: 18, change: "down", lastAudit: "3d ago" },
+    { id: "13", rank: 13, name: "VibeCode", url: "vibecode.xyz", slug: "vibecode-xyz", classRank: 1, latency: 3456, score: 12, change: "down", lastAudit: "5d ago" },
 ];
 
-// Ticker items for marquee - mix of baselines and audited targets
+// Ticker items for marquee
 const TICKER_ITEMS = [
-    { name: "NOTION", class: 4, type: "win" },
+    { name: "LINEAR.APP", class: 5, type: "win" },
     { name: "TALKPDF", class: 1, type: "fail" },
-    { name: "FIGMA", class: 4, type: "win" },
+    { name: "STRIPE", class: 5, type: "win" },
     { name: "VIBECODE", class: 1, type: "fail" },
-    { name: "RAYCAST", class: 3, type: "win" },
+    { name: "VERCEL", class: 5, type: "win" },
     { name: "FASTGEN", class: 1, type: "fail" },
+    { name: "NOTION", class: 4, type: "win" },
     { name: "CAL.COM", class: 3, type: "win" },
-    { name: "SHIPFAST", class: 2, type: "fail" },
 ];
 
 // ==================== COMPONENTS ====================
@@ -288,39 +269,8 @@ export default function LeaderboardPage() {
             <StatusBar />
             <TickerTape />
             <StatsBar />
-
-            {/* Baseline References Section */}
-            <div className="border-b border-gray-800 bg-gray-950/50">
-                <div className="max-w-7xl mx-auto px-4 py-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <Shield className="w-4 h-4 text-amber-400" />
-                        <h2 className="font-mono text-xs text-gray-400 uppercase tracking-widest">
-                            Industry Baselines <span className="text-amber-400">// CLASS 05 REFERENCE</span>
-                        </h2>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {BASELINE_REFERENCES.map((ref) => (
-                            <div
-                                key={ref.id}
-                                className="border border-amber-400/20 bg-amber-400/5 px-4 py-3 hover:border-amber-400/40 transition-colors"
-                            >
-                                <div className="flex items-center justify-between mb-1">
-                                    <span className="font-bold text-amber-400">{ref.name}</span>
-                                    <span className="font-mono text-xs text-amber-400/70">{ref.score}</span>
-                                </div>
-                                <div className="font-mono text-[10px] text-gray-500">{ref.url}</div>
-                                <div className="font-mono text-[10px] text-gray-600 mt-1">{ref.description}</div>
-                            </div>
-                        ))}
-                    </div>
-                    <p className="text-center font-mono text-[10px] text-gray-600 mt-4">
-                        These industry leaders serve as security benchmarks — not competing in rankings
-                    </p>
-                </div>
-            </div>
-
             <SearchBar />
-            <DataGrid data={RANKED_ENTRIES} />
+            <DataGrid data={MOCK_DATA} />
 
             {/* Footer */}
             <div className="border-t border-gray-800 bg-gray-950">

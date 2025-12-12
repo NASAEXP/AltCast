@@ -103,7 +103,7 @@ export function HeroTerminal() {
                     >
                         You built it fast. Now make it bulletproof.
                         <span className="font-bold text-white block mt-2">AltCast is the hostile user you forgot to test for.</span>
-                        <span className="text-xs text-gray-500 block mt-2">We test your UI like a malicious user would — no server attacks, just real user chaos.</span>
+                        We stress-test your UI like a chaotic real user. Not your servers.
                     </motion.h2>
 
                     <motion.div
@@ -131,11 +131,11 @@ export function HeroTerminal() {
                                 disabled={result.state === "scanning" || !url}
                                 className="w-full bg-acid text-black font-black uppercase py-4 hover:bg-white transition-colors interactive-el tracking-widest text-lg border-2 border-acid disabled:opacity-50 disabled:cursor-not-allowed group-hover:shadow-glow-acid"
                             >
-                                {result.state === "scanning" ? "[ DEPLOYING CHAOS... ]" : "[ DEPLOY CHAOS ]"}
+                                {result.state === "scanning" ? "[ DEPLOYING AGENTS... ]" : "[ DEPLOY CHAOS ]"}
                             </button>
                         </div>
                         <p className="font-mono text-[10px] text-gray-600 mt-2 text-center uppercase tracking-wider">
-                            No credit card. We only charge if we find blood.
+                            Free UI audit. We test your frontend like a hostile user. No server attacks.
                         </p>
                     </motion.div>
                 </div>
@@ -149,7 +149,7 @@ export function HeroTerminal() {
                             <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
                             <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
                         </div>
-                        <div className="font-mono text-xs font-bold uppercase tracking-widest text-gray-600">bash — hostile_audit_v5.sh</div>
+                        <div className="font-mono text-xs font-bold uppercase tracking-widest text-gray-600">bash // hostile_audit_v5.sh</div>
                     </div>
 
                     {/* Terminal Body */}

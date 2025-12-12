@@ -42,12 +42,9 @@ export function GlassCannon() {
                 </div>
             </div>
 
-            <div className="mt-16 text-center space-y-4">
+            <div className="mt-16 text-center">
                 <p className="font-black text-2xl uppercase border-b-4 border-danger text-white inline-block pb-1">
-                    If you can't read the code, you can't fix the code.
-                </p>
-                <p className="font-mono text-sm text-acid">
-                    We don't just break it. We generate the diff to fix it.
+                    If you can't read the code, you can't fix the code. We do both.
                 </p>
             </div>
         </section>
